@@ -127,6 +127,9 @@ When multiple guidance files exist, target exactly one, in this order:
 - No guidance target → create `.claude/CLAUDE.md` with the same block plus a
   one-line stub for project-specific instructions.
 
+If the file was written as `DESIGN.v2.md`, replace `./DESIGN.md` with
+`./DESIGN.v2.md` in the block below.
+
 The block:
 
 ```markdown

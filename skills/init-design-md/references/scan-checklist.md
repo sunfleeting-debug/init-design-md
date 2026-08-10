@@ -12,7 +12,7 @@ Phase 3 question count stays capped at 4).
 | 3 | `tailwind.config.{js,ts,mjs,cjs}` | `hasTailwindTokens` (colors/spacing/fontFamily defined), existing token values to carry forward |
 | 4 | `postcss.config.*`, `globals.css`, `theme.css`, `variables.css`, `app.css` | `hasCssVars` (--color-*, --font-*, --spacing-* variables), actual color values |
 | 5 | Root `DESIGN.md` | `hasExistingDesignMd` (conflict detection for Phase 5) |
-| 6 | `CLAUDE.md`, `AGENTS.md`, `.claude/CLAUDE.md` | `guidanceTarget` — which file exists / is the primary agent-guidance file |
+| 6 | `.claude/CLAUDE.md`, `CLAUDE.md`, `AGENTS.md` | `guidanceTarget` — which file exists / is the primary agent-guidance file, in Phase 5's precedence order (`.claude/CLAUDE.md` → `CLAUDE.md` → `AGENTS.md`) |
 | 7 | (only with `--deep`) 3–5 sampled UI component files + any CSS modules | actual color usage, spacing rhythm, component patterns to reflect in tokens |
 
 ## Derived booleans
