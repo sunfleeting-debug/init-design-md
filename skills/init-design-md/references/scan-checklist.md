@@ -17,5 +17,6 @@ missing, skip it silently and continue. If ALL files are unreadable, set
 ## Derived booleans
 
 - `noPrimaryColor` — no `colors.primary` token found (from CSS vars / tailwind)
+- `hasPrimaryColor` — negation of `noPrimaryColor`; used by the accent-usage question
 - `noTypography` — no `fontFamily` tokens found
 - `mentionsDark` — `dark` / `night` / `theme-switch` / `prefers-color-scheme` appears in deps or README

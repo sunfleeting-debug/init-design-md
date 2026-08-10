@@ -11,7 +11,9 @@ The `export --format json-tailwind` emitter maps:
 | DESIGN.md group | Tailwind namespace |
 |:----------------|:-------------------|
 | `colors.*` | `theme.extend.colors` |
-| `typography.*` | `theme.extend.fontFamily` / `fontSize` / `fontWeight` / `lineHeight` / `letterSpacing` |
+| `typography.fontFamily` | `theme.extend.fontFamily` |
+| `typography.fontSize` | `theme.extend.fontSize` |
+| `typography.*` (other) | folded into the fontSize tuples (weight / lineHeight / letterSpacing metadata), not separate namespaces |
 | `rounded.*` | `theme.extend.borderRadius` |
 | `spacing.*` | `theme.extend.spacing` |
 
