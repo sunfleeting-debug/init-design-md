@@ -2,7 +2,8 @@
 
 Read each item in order. Extract the facts listed under "Extract". If a file is
 missing, skip it silently and continue. If ALL files are unreadable, set
-`degradedScan: true` and expand the Phase 3 question set.
+`degradedScan: true` and continue (the
+Phase 3 question count stays capped at 4).
 
 | # | File | Extract |
 |:--|:-----|:--------|
