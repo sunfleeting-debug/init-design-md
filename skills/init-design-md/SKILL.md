@@ -30,26 +30,37 @@ into an in-memory `projectContext`:
 If all files are unreadable, set `degradedScan: true` and continue — do not
 abort.
 
+If the invocation included `--deep`, also read 3–5 sampled UI component files
+and any CSS modules (scan-checklist row 7) and reflect them in the extracted
+facts.
+
 ## Phase 2 — Decide what to ask
 
 Read `references/question-bank.yaml`. Select questions whose `trigger` matches
-`projectContext`. The `always` trigger always matches. Sort selected questions
+`projectContext`. The `always` trigger always matches. A trigger matches when
+its named `projectContext` boolean is true. Sort selected questions
 by `priority` ascending, then take the top 4.
 
 If zero questions match, skip Phase 3 entirely.
 
-If `degradedScan` is true, expand the selection to the top 6 (the scan failed,
-so more answers are needed).
+`degradedScan` does not change the question count — the cap is always 4.
 
 ## Phase 3 — Ask the user (one batched call)
 
 Make **one** `AskUserQuestion` call with up to 4 questions. Follow the
-question-bank's `options` verbatim. Every question must carry:
-- 3–4 options with one-line descriptions
+question-bank's `options` verbatim and carry over each question's `header`
+field unchanged. Every question must carry:
+- 2–4 options with one-line descriptions
 - the `defaultIndex` option labeled with `(recommended)` in its label
 
 If the user picks "Other" and leaves it blank, treat it as accepting the
 default.
+
+If the user cancels the question prompt, print `Generation cancelled.` and
+stop — do not write any files.
+
+If the user picks an option that requests custom input (e.g. '我直接给 hex',
+'我自定义'), ask one short follow-up for the value and use it.
 
 If the command was invoked with `--defaults`, **skip this phase** and use each
 question's `defaultIndex`.
@@ -57,18 +68,24 @@ question's `defaultIndex`.
 ## Phase 4 — Draft the DESIGN.md
 
 Read `references/spec-summary.md` and `references/tailwind-export-cheatsheet.md`.
+Also read `examples/minimal.md` as a structural reference for the output shape.
 
 Build YAML front matter by:
 1. Carrying forward tokens found in Phase 1 (CSS vars, tailwind colors) with
    the same values and names where possible.
 2. Filling gaps with the user's Phase 3 answers, or with question-bank defaults
-   if Phase 3 was skipped.
+   if Phase 3 was skipped. Map answers to the fields they concern: primary
+   color → `colors.primary`; typography → `typography.fontFamily`/`fontSize`;
+   accent scope → `colors.accent`; density → Layout rationale; corner style →
+   `rounded.*`; dark mode → a dark-variant note in the rationale; system
+   name → front-matter `name`.
 3. Using Tailwind-friendly token names per the cheatsheet.
 4. **Never inventing a schema field.** If a needed field isn't in
    `spec-summary.md`, omit it. The `omitted` front-matter key may only name
    these five sections: `colors`, `typography`, `spacing`, `rounded`,
    `components`. (Layout and Elevation & Depth cannot be declared omitted —
-   the linter rejects unknown omitted names.)
+   the linter rejects unknown omitted names.) When you decide not to include
+   one of those five sections, declare it in the `omitted` front-matter list.
 
 Build the markdown body in canonical section order (Overview, Colors,
 Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts).
@@ -102,6 +119,9 @@ Merge semantics for `merge into existing`:
 
 **Agent-guidance file:**
 
+When multiple guidance files exist, target exactly one, in this order:
+`.claude/CLAUDE.md`, then `CLAUDE.md`, then `AGENTS.md`.
+
 - `guidanceTarget` found (CLAUDE.md / AGENTS.md / .claude/CLAUDE.md) → append a
   `## Design System` block referencing `./DESIGN.md`. Never replace the file.
 - No guidance target → create `.claude/CLAUDE.md` with the same block plus a
@@ -122,9 +142,14 @@ After making UI changes, re-read `DESIGN.md` to verify the result stays
 within the spec.
 ```
 
+On write failure (permission denied, disk full, etc.), print the specific
+reason and a remediation, record it as a degraded phase, and continue to
+Phase 7.
+
 ## Phase 6 — Verify (best-effort)
 
-Run `npx @google/design.md lint DESIGN.md`. If it runs, print the findings.
+Run `npx --yes @google/design.md lint <the file written this run>`. If it
+runs, print the findings.
 
 Expect warnings on generated files — for example, an `orphaned-tokens` warning
 for a color defined but not yet referenced by any component is normal and not a
@@ -142,4 +167,5 @@ Print a single summary block:
 - List of any degraded phases (scan failure, defaults used, lint skipped) —
   **nothing silent**
 - Next steps: review `DESIGN.md`, optionally run
-  `npx @google/design.md export --format css-tailwind DESIGN.md`, commit.
+  `npx --yes @google/design.md export --format css-tailwind <that same file>`,
+  commit.
