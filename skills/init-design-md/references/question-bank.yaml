@@ -53,9 +53,9 @@
   header: 界面密度
   defaultIndex: 1
   options:
-    - label: 紧凑 (recommended)
+    - label: 紧凑
       description: 数据密集，减少留白，适合 dashboard/admin
-    - label: 舒适
+    - label: 舒适 (recommended)
       description: 默认留白，通用
     - label: 宽松
       description: 大留白，营销/编辑风格

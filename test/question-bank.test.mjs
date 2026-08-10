@@ -64,3 +64,12 @@ test('defaultIndex points at a valid option and priority is unique', () => {
     priorities.add(item.priority);
   }
 });
+
+test('the default option is the one labeled (recommended)', () => {
+  const q = loadQuestions();
+  for (const item of q) {
+    const defaultLabel = item.options[item.defaultIndex].label;
+    assert.ok(defaultLabel.includes('(recommended)'),
+      `question "${item.id}": default option "${defaultLabel}" is not labeled "(recommended)"`);
+  }
+});
