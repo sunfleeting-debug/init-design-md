@@ -27,6 +27,9 @@ components:
     <token-name>: <string | token reference>
 ```
 
+> Note: `spacing` values must carry a unit — bare numbers are dropped by the
+> exporter. Always use unit'd values (e.g. `8px`).
+
 ## Token types
 
 | Type | Format | Example |

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "design-md-init",
+  "description": "Marketplace for the design-md-init plugin — bootstrap a DESIGN.md for any project.",
+  "owner": {
+    "name": "Fleeting"
+  },
+  "plugins": [
+    {
+      "name": "design-md-init",
+      "description": "Bootstrap a DESIGN.md for any project to standardize AI-generated UI. Scans the project, asks a few clarifying questions, writes DESIGN.md + agent guidance.",
+      "version": "0.1.0",
+      "source": ".",
+      "author": {
+        "name": "Fleeting"
+      }
+    }
+  ]
+}

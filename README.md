@@ -14,14 +14,16 @@ Scans your project, asks a few clarifying questions, then writes:
 
 ## Install
 
-```bash
-# from a local checkout of this repo
-claude plugin install /path/to/design-md-init
+This repo doubles as a plugin marketplace.
 
-# or from the marketplace once published
-claude plugin marketplace add <marketplace-repo>
-# pin with @<marketplace> when several marketplaces exist
-claude plugin install design-md-init@<marketplace>
+```bash
+# from a local checkout
+claude plugin marketplace add /path/to/design-md-init
+claude plugin install design-md-init
+
+# once published to GitHub, add by URL instead
+claude plugin marketplace add Fleeting/design-md-init
+claude plugin install design-md-init
 ```
 
 ## Use

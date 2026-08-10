@@ -9,15 +9,23 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REFS = path.join(root, 'skills/init-design-md/references');
 const VALID_TRIGGERS = new Set([
+  // All projectContext booleans/values listed in SKILL.md Phase 1, plus the
+  // special `always` trigger. Kept in the same order as Phase 1.
+  'stack',
+  'hasTailwind',
+  'hasTailwindTokens',
+  'hasCssVars',
   'noPrimaryColor',
   'hasPrimaryColor',
   'noTypography',
-  'hasTailwindTokens',
   'looksLikeDashboard',
   'looksLikeMarketing',
   'hasFigmaLink',
   'mentionsDark',
   'hasExistingDesignMd',
+  'guidanceTarget',
+  'intent',
+  'degradedScan',
   'always',
 ]);
 

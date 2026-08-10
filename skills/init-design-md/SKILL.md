@@ -84,7 +84,7 @@ Build YAML front matter by:
    `spec-summary.md`, omit it. The `omitted` front-matter key may only name
    these five sections: `colors`, `typography`, `spacing`, `rounded`,
    `components`. (Layout and Elevation & Depth cannot be declared omitted —
-   the linter rejects unknown omitted names.) When you decide not to include
+   the linter warns on unknown omitted names.) When you decide not to include
    one of those five sections, declare it in the `omitted` front-matter list.
 
 Build the markdown body in canonical section order (Overview, Colors,
