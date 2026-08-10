@@ -1,0 +1,18 @@
+{
+  "name": "design-md-init",
+  "description": "Bootstrap a DESIGN.md for any project to standardize AI-generated UI. Scans the project, asks a few clarifying questions, writes DESIGN.md + agent guidance.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Fleeting"
+  },
+  "homepage": "https://github.com/Fleeting/design-md-init",
+  "repository": "https://github.com/Fleeting/design-md-init",
+  "license": "Apache-2.0",
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "design-md",
+    "ai-agents",
+    "ui-consistency"
+  ]
+}
