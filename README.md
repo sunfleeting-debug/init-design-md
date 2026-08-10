@@ -20,7 +20,8 @@ claude plugin install /path/to/design-md-init
 
 # or from the marketplace once published
 claude plugin marketplace add <marketplace-repo>
-claude plugin install design-md-init
+# pin with @<marketplace> when several marketplaces exist
+claude plugin install design-md-init@<marketplace>
 ```
 
 ## Use
@@ -42,8 +43,8 @@ claude plugin install design-md-init
 After generating, validate and wire up your build:
 
 ```bash
-npx @google/design.md lint DESIGN.md
-npx @google/design.md export --format css-tailwind DESIGN.md > theme.css
+npx --yes @google/design.md lint DESIGN.md
+npx --yes @google/design.md export --format css-tailwind DESIGN.md > theme.css
 ```
 
 ## Development

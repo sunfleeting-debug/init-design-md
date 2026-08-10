@@ -9,19 +9,25 @@ instructions, so this is where the plugin's actual behavior gets verified.
 1. `cd` into a real project (pick one NOT already using this plugin).
 2. Run `/init-design-md` in Claude Code.
 3. Verify:
-   - `./DESIGN.md` was created and reads sensibly (not generic filler).
-   - YAML front matter parses; run `npx @google/design.md lint DESIGN.md` →
+   - `./DESIGN.md` was created and reads sensibly (not generic filler);
+     Overview references this project's stack or name.
+   - YAML front matter parses; run `npx --yes @google/design.md lint DESIGN.md` →
      exit 0.
-   - The agent-guidance block was appended to `CLAUDE.md` / `AGENTS.md` /
-     `.claude/CLAUDE.md`.
-   - Rerun `/init-design-md` → prompts with overwrite / merge / rename (no
-     `--from-existing`).
-   - Rerun `/init-design-md --defaults` → no questions asked; Overview contains
-     the defaults-notice sentence.
+   - The agent-guidance block was appended to `.claude/CLAUDE.md` (or
+     `CLAUDE.md` / `AGENTS.md`, per Phase 5 precedence), or created if none
+     existed.
+   - Rerun `/init-design-md` → prompts with overwrite / merge / write as
+     DESIGN.v2.md (no `--from-existing`). Choose **overwrite** to move on.
+   - Rerun `/init-design-md --defaults` → no clarifying questions (Phase 3
+     skipped); at the conflict prompt choose **overwrite**; the regenerated
+     Overview contains the defaults-notice sentence.
    - Rerun `/init-design-md --from-existing` → no prompt; prints merged diff;
      existing token values unchanged.
-4. Record the run under `tests/golden/<date>-<project>/` (create dir) with the
-   generated DESIGN.md and a short note on anything odd.
+   - Rerun `/init-design-md --deep` → DESIGN.md tokens reflect sampled UI
+     source files (only if the project has UI components).
+4. Back in the plugin repo, record the run under `test/golden/<date>-<project>/`
+   (create dir, commit it) with the generated DESIGN.md and a short note on
+   anything odd.
 
 ## Failures
 
