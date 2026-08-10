@@ -1,6 +1,6 @@
 # design-md-init
 
-A Claude Code plugin that bootstraps a [DESIGN.md](https://github.com/google/design.md)
+A Claude Code plugin that bootstraps a [DESIGN.md](https://github.com/google-labs-code/design.md)
 for any project, standardizing AI-generated UI.
 
 ## What it does
