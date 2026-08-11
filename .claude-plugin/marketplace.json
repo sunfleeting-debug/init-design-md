@@ -3,7 +3,7 @@
   "name": "design-md-init",
   "description": "Marketplace for the design-md-init plugin — bootstrap a DESIGN.md for any project.",
   "owner": {
-    "name": "Fleeting"
+    "name": "sunfleeting-debug"
   },
   "plugins": [
     {
@@ -12,7 +12,7 @@
       "version": "0.1.0",
       "source": ".",
       "author": {
-        "name": "Fleeting"
+        "name": "sunfleeting-debug"
       }
     }
   ]

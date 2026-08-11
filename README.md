@@ -34,7 +34,7 @@ claude plugin marketplace add /path/to/design-md-init
 claude plugin install design-md-init
 
 # 从 GitHub 安装(发布后) / install from GitHub once published
-claude plugin marketplace add Fleeting/design-md-init
+claude plugin marketplace add sunfleeting-debug/init-design-md
 claude plugin install design-md-init
 ```
 

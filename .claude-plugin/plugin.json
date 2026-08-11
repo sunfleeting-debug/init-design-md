@@ -3,10 +3,10 @@
   "description": "Bootstrap a DESIGN.md for any project to standardize AI-generated UI. Scans the project, asks a few clarifying questions, writes DESIGN.md + agent guidance.",
   "version": "0.1.0",
   "author": {
-    "name": "Fleeting"
+    "name": "sunfleeting-debug"
   },
-  "homepage": "https://github.com/Fleeting/design-md-init",
-  "repository": "https://github.com/Fleeting/design-md-init",
+  "homepage": "https://github.com/sunfleeting-debug/init-design-md",
+  "repository": "https://github.com/sunfleeting-debug/init-design-md",
   "license": "Apache-2.0",
   "keywords": [
     "design-tokens",
