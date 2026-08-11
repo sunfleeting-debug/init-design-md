@@ -1,51 +1,60 @@
 # design-md-init
 
-> 一键为你的项目生成规范化的 [DESIGN.md](https://github.com/google-labs-code/design.md),让所有 AI 代理产出统一、可控的 UI 设计。
+让 AI 代理按你的设计系统生成 UI。
+
+Standardize AI-generated UI across your project.
 
 ## 简介 / Overview
 
-**中文:** `design-md-init` 是一个 Claude Code 插件,用于把 [DESIGN.md](https://github.com/google-labs-code/design.md) 设计令牌规范带到任何项目中。它会扫描你的项目结构,询问几个关键的设计决策(主色调、字体、密度、圆角等),然后自动生成一份完整的 `DESIGN.md`——包含 YAML 格式的设计令牌和 Markdown 格式的设计理念说明。同时它会把"先读 DESIGN.md 再写 UI 代码"的引导块注入到 `CLAUDE.md` / `AGENTS.md`,确保后续所有 AI 代理都按你定义的设计系统生成 UI,从源头杜绝颜色、间距、字体等不一致问题。无需任何配置,一条命令即可。
+**中文:** 一个 Claude Code 插件。先扫描项目,问几个关键问题(主色、字体、密度、圆角等),然后在项目根目录生成一份 `DESIGN.md` —— 用 YAML 写下设计令牌(颜色、字体、间距、圆角等),用 Markdown 写下设计理念与使用规则。同时它会把一段"先生成 UI 代码前先读 DESIGN.md"的引导写进 `CLAUDE.md` / `AGENTS.md`,让后续每一个 AI 代理都按你的设计系统产出 UI,杜绝颜色/间距/字体随机发挥。一条命令完成。
 
-**English:** `design-md-init` is a Claude Code plugin that brings the [DESIGN.md](https://github.com/google-labs-code/design.md) design-token specification into any project. It scans your project structure, asks a few key design decisions (primary color, typography, density, corner style, etc.), then auto-generates a complete `DESIGN.md` — with YAML design tokens and Markdown design rationale. It also injects a "read DESIGN.md before writing UI" guidance block into `CLAUDE.md` / `AGENTS.md`, so every AI agent in the project generates UI strictly against your design system. Zero config, one command.
+**English:** A Claude Code plugin that scans your project, asks a few key design questions (primary color, typography, density, corner style, etc.), then writes a complete `DESIGN.md` at the project root — with design tokens (colors, typography, spacing, corner radius, etc.) in YAML and design rationale plus usage rules in Markdown. It also injects a "read DESIGN.md before writing UI" guidance block into `CLAUDE.md` / `AGENTS.md`, so every AI agent working on the project generates UI strictly against your design system. Zero config, one command.
 
-## What it does
+## 它做什么 / What it does
 
-Scans your project, asks a few clarifying questions, then writes:
+写两个文件:
 
-1. `./DESIGN.md` — the design-system truth: tokens in YAML front matter + design
-   rationale in markdown.
-2. A `## Design System` block in `CLAUDE.md` / `AGENTS.md` (or a new
-   `.claude/CLAUDE.md`) so AI agents read `DESIGN.md` before generating UI.
+1. `./DESIGN.md` —— 设计系统的"单一事实源":YAML 令牌 + Markdown 理念。
+2. 一段 `## Design System` 块,追加到 `CLAUDE.md` / `AGENTS.md`(若无则新建 `.claude/CLAUDE.md`)—— 让 AI 代理在写 UI 前自动读到 DESIGN.md。
 
-## Install
+It writes two things:
+
+1. `./DESIGN.md` — the design system source of truth: YAML tokens + Markdown rationale.
+2. A `## Design System` block, appended to `CLAUDE.md` / `AGENTS.md` (or a new `.claude/CLAUDE.md` if none exist) — so AI agents read DESIGN.md before generating UI.
+
+## 安装 / Install
+
+本仓库本身就是一个 plugin marketplace。
 
 This repo doubles as a plugin marketplace.
 
 ```bash
-# from a local checkout
+# 从本地目录 / from a local checkout
 claude plugin marketplace add /path/to/design-md-init
 claude plugin install design-md-init
 
-# once published to GitHub, add by URL instead
+# 从 GitHub 安装(发布后) / install from GitHub once published
 claude plugin marketplace add Fleeting/design-md-init
 claude plugin install design-md-init
 ```
 
-## Use
+## 使用 / Use
 
 ```bash
-# in the project you want to bootstrap
+# 初始化当前项目 / bootstrap the current project
 /init-design-md
 
-# skip questions, use defaults
+# 跳过提问,用默认 / skip questions, use defaults
 /init-design-md --defaults
 
-# include existing UI source files in the scan
+# 深度扫描 UI 组件文件 / include existing UI source files in the scan
 /init-design-md --deep
 
-# auto-merge into an existing DESIGN.md without prompting
+# 已有 DESIGN.md 时不提示,自动合并 / auto-merge into an existing DESIGN.md
 /init-design-md --from-existing
 ```
+
+生成后,验证 + 接入构建:
 
 After generating, validate and wire up your build:
 
@@ -54,13 +63,17 @@ npx --yes @google/design.md lint DESIGN.md
 npx --yes @google/design.md export --format css-tailwind DESIGN.md > theme.css
 ```
 
-## Development
+## 开发 / Development
 
 ```bash
 npm install
 npm test
 ```
 
-## License
+测试套件包含真实 linter 集成测试(对黄金示例跑真实校验)。
+
+The test suite includes a real-linter integration test against the golden example.
+
+## 许可证 / License
 
 Apache-2.0
