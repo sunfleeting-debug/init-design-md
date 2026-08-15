@@ -1,35 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import { lint } from '@google/design.md/linter';
-
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const example = path.join(root, 'skills/init-design-md/examples/minimal.md');
-const LINT_CLI = path.join(root, 'node_modules/@google/design.md/dist/index.js');
+import { frontmatter, headings, paths, readText } from './helpers/repo.mjs';
 
 test('examples/minimal.md parses as YAML front matter', () => {
-  const raw = readFileSync(example, 'utf8');
-  const fm = raw.match(/^---\n([\s\S]*?)\n---/);
-  assert.ok(fm, 'must have YAML front matter delimited by ---');
-  const data = yaml.load(fm[1]);
+  const { data } = frontmatter(paths.example);
   assert.equal(typeof data, 'object');
   assert.ok(data.name, 'front matter needs a name');
   assert.ok(data.colors?.primary, 'front matter needs colors.primary');
 });
 
 test('examples/minimal.md has canonical section order', () => {
-  const raw = readFileSync(example, 'utf8');
-  const headings = [...raw.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
   const canonical = [
     'Overview', 'Colors', 'Typography', 'Layout', 'Elevation & Depth',
     'Shapes', 'Components', "Do's and Don'ts",
   ];
   let prev = -1;
-  for (const h of headings) {
+  for (const h of headings(paths.example)) {
     const idx = canonical.indexOf(h);
     assert.ok(idx > prev, `section "${h}" out of canonical order`);
     prev = idx;
@@ -37,7 +25,7 @@ test('examples/minimal.md has canonical section order', () => {
 });
 
 test('real linter: examples/minimal.md has zero errors (exit 0 state)', () => {
-  const report = lint(readFileSync(example, 'utf8'));
+  const report = lint(readText(paths.example));
   const errors = report.findings.filter((f) => f.severity === 'error');
   assert.equal(report.summary.errors, 0,
     `real linter reported errors:\n${JSON.stringify(errors, null, 2)}`);
@@ -52,7 +40,7 @@ test('real linter: examples/minimal.md has zero errors (exit 0 state)', () => {
 });
 
 test('real linter CLI exits 0 on examples/minimal.md', () => {
-  const res = spawnSync(process.execPath, [LINT_CLI, 'lint', example], {
+  const res = spawnSync(process.execPath, [paths.lintCli, 'lint', paths.example], {
     encoding: 'utf8',
   });
   assert.equal(res.status, 0,

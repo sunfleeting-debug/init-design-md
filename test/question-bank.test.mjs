@@ -1,13 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import { Ajv2020 } from 'ajv/dist/2020.js';
+import { loadQuestions, paths, readJson } from './helpers/repo.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REFS = path.join(root, 'skills/init-design-md/references');
 const VALID_TRIGGERS = new Set([
   // All projectContext booleans/values listed in SKILL.md Phase 1, plus the
   // special `always` trigger. Kept in the same order as Phase 1.
@@ -29,11 +24,6 @@ const VALID_TRIGGERS = new Set([
   'always',
 ]);
 
-function loadQuestions() {
-  const raw = readFileSync(path.join(REFS, 'question-bank.yaml'), 'utf8');
-  return yaml.load(raw);
-}
-
 test('question-bank.yaml is valid YAML and an array', () => {
   const q = loadQuestions();
   assert.ok(Array.isArray(q), 'question-bank.yaml must be a YAML array');
@@ -41,9 +31,7 @@ test('question-bank.yaml is valid YAML and an array', () => {
 });
 
 test('every question matches the JSON schema', () => {
-  const schema = JSON.parse(
-    readFileSync(path.join(REFS, 'question-bank.schema.json'), 'utf8')
-  );
+  const schema = readJson(paths.questionBankSchema);
   const ajv = new Ajv2020({ allErrors: true });
   const validate = ajv.compile(schema);
   const q = loadQuestions();
