@@ -1,9 +1,19 @@
 # Scan Checklist — files to read in order
 
-Read each item in order. Extract the facts listed under "Extract". If a file is
-missing, skip it silently and continue. If ALL files are unreadable, set
-`degradedScan: true` and continue (the
-Phase 3 question count stays capped at 4).
+Read each item in order. Extract the facts listed under "Extract".
+
+Missing and unreadable are different outcomes:
+
+- **File does not exist** — expected; skip it silently and continue.
+- **File exists but read/parse fails** (permission denied, invalid JSON/YAML,
+  bad encoding) — record `<file>: <verbatim reason>` in `scanErrors`, set
+  `partialScan: true`, and continue. Never swallow the reason: the facts this
+  row would have produced are now unknown, not false, and that changes the
+  Phase 2 question selection and the tokens Phase 4 carries forward.
+
+If every file that exists failed to read, also set `degradedScan: true` and
+continue (the Phase 3 question count stays capped at 4). All three signals get
+reported in the Phase 7 summary.
 
 | # | File | Extract |
 |:--|:-----|:--------|

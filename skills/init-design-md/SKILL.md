@@ -11,8 +11,32 @@ future AI work in this project follows it.
 ## Workflow
 
 Run the seven phases below **in order**. Each phase has explicit success /
-degraded / failure outcomes. **A phase failure never aborts the run** — degrade
-forward and report what degraded in the Phase 7 summary.
+degraded / failure outcomes. Most phase failures degrade forward instead of
+aborting; the two hard failures listed below stop the run. Either way, every
+failure must surface in the Phase 7 summary.
+
+## Error handling contract
+
+This applies to every phase and overrides any phase-local wording:
+
+1. Keep an in-memory `degradations` list. On any failed or skipped step, append
+   an entry with: phase, what was attempted, the **verbatim** error or exit
+   code, and a one-line remediation. Never discard an error message — no
+   "continue silently" other than the missing-optional-file case in
+   `references/scan-checklist.md`.
+2. Never claim a step succeeded that you did not verify. After writing a file,
+   confirm it exists and is non-empty before reporting it as written.
+3. **Hard failures** stop the run: print the reason and the `degradations` list,
+   report `Status: failed`, and skip the remaining phases. There are exactly
+   two:
+   - `references/spec-summary.md` unreadable (Phase 4) — without it there is no
+     legal field list, so any output would be invented.
+   - `./DESIGN.md` (or `DESIGN.v2.md`) could not be written (Phase 5) — there is
+     nothing for the guidance block to point at.
+   A cancelled question prompt (Phase 3) also stops the run, but as
+   `Status: cancelled` with no files written.
+4. Every other failure is a **degradation**: record it, keep going, and reflect
+   it in the Phase 7 status.
 
 ## Phase 1 — Scan the project (mandatory)
 
@@ -25,10 +49,21 @@ into an in-memory `projectContext`:
 - `hasFigmaLink`, `mentionsDark`, `hasExistingDesignMd`
 - `guidanceTarget` (`CLAUDE.md` | `AGENTS.md` | `.claude/CLAUDE.md` | null)
 - `intent` (one-sentence project summary)
-- `degradedScan` (true if no files were readable)
+- `degradedScan` (true if no existing file was readable)
+- `partialScan` (true if any existing file failed to read or parse)
+- `scanErrors` (list of `<file>: <verbatim reason>`)
 
-If all files are unreadable, set `degradedScan: true` and continue — do not
-abort.
+Distinguish the two failure modes while walking the checklist:
+
+- A file that does not exist is expected — skip it, no entry needed.
+- A file that exists but cannot be read or parsed (permission denied, invalid
+  JSON/YAML, unreadable encoding) is an error: append it to `scanErrors` with
+  the verbatim reason, set `partialScan: true`, and continue.
+
+If every checklist file that exists failed to read, set `degradedScan: true` and
+continue — do not abort. Both `partialScan` and `scanErrors` must appear in the
+Phase 7 summary, because facts missing from the scan silently change which
+questions Phase 2 selects and which tokens Phase 4 carries forward.
 
 If the invocation included `--deep`, also read 3–5 sampled UI component files
 and any CSS modules (scan-checklist row 7) and reflect them in the extracted
@@ -36,7 +71,12 @@ facts.
 
 ## Phase 2 — Decide what to ask
 
-Read `references/question-bank.yaml`. Select questions whose `trigger` matches
+Read `references/question-bank.yaml`. If it is missing, unreadable, or not
+valid YAML, record a degradation with the verbatim reason and fall back to the
+built-in defaults described in Phase 4 — skip Phase 3 rather than asking
+nothing and pretending the user was consulted.
+
+Select questions whose `trigger` matches
 `projectContext`. The `always` trigger always matches. A trigger matches when
 its named `projectContext` boolean is true. Sort selected questions
 by `priority` ascending, then take the top 4.
@@ -69,6 +109,11 @@ question's `defaultIndex`.
 
 Read `references/spec-summary.md` and `references/tailwind-export-cheatsheet.md`.
 Also read `examples/minimal.md` as a structural reference for the output shape.
+
+If `spec-summary.md` is unreadable, this is a hard failure — stop per the error
+handling contract. If `tailwind-export-cheatsheet.md` or `examples/minimal.md`
+is unreadable, record a degradation (token names may not be Tailwind-friendly /
+section shape unverified) and continue.
 
 Build YAML front matter by:
 1. Carrying forward tokens found in Phase 1 (CSS vars, tailwind colors) with
@@ -115,9 +160,14 @@ Merge semantics for `merge into existing`:
 - Keep existing sections verbatim; append draft sections that are absent, in
   canonical order.
 - Never overwrite an existing scalar token value; append new tokens.
-- Write atomically (write to `DESIGN.md.tmp`, then rename over `DESIGN.md`).
+- Write atomically (write to `DESIGN.md.tmp`, then rename over `DESIGN.md`). If
+  either step fails, delete `DESIGN.md.tmp` so no partial file is left behind,
+  and report the failure — the original `DESIGN.md` must stay untouched.
 
 **Agent-guidance file:**
+
+Skip this write entirely if the DESIGN.md write failed — the block would point
+at a file that does not exist.
 
 When multiple guidance files exist, target exactly one, in this order:
 `.claude/CLAUDE.md`, then `CLAUDE.md`, then `AGENTS.md`.
@@ -146,29 +196,50 @@ within the spec.
 ```
 
 On write failure (permission denied, disk full, etc.), print the specific
-reason and a remediation, record it as a degraded phase, and continue to
-Phase 7.
+reason and a remediation:
+
+- DESIGN.md / DESIGN.v2.md failed → hard failure, stop per the error handling
+  contract. Do not report a design system as generated.
+- Guidance file failed → record a degradation (agents will not be pointed at
+  `DESIGN.md` until the block is added by hand, so include the exact block in
+  the summary) and continue to Phase 6.
 
 ## Phase 6 — Verify (best-effort)
 
-Run `npx --yes @google/design.md lint <the file written this run>`. If it
-runs, print the findings.
+Run `npx --yes @google/design.md lint <the file written this run>`. Capture its
+exit code, stdout, and stderr, and distinguish three outcomes — do not collapse
+them into "lint ran":
 
-Expect warnings on generated files — for example, an `orphaned-tokens` warning
-for a color defined but not yet referenced by any component is normal and not a
-failure. **The success bar is exit code 0 / zero errors.**
+- **Exit 0** — verification passed. Print the findings. Expect warnings on
+  generated files; for example, an `orphaned-tokens` warning for a color defined
+  but not yet referenced by any component is normal and not a failure.
+  **The success bar is exit code 0 / zero errors.**
+- **Non-zero exit with lint errors** — the generated file violates the spec.
+  Print every error finding (rule, path, message), record a degradation naming
+  the exit code and the failing rules, and report `Status: completed with
+  degradations` in Phase 7. Never report a clean run just because the file was
+  written.
+- **The linter could not run** (no network, `npx` missing, non-zero exit with no
+  parseable findings) — record a degradation with the verbatim stderr and exit
+  code, and tell the user the command to run manually.
 
-If `npx` fails (no network / not installed), skip and tell the user to run it
-manually. This phase never blocks anything.
+This phase never blocks the run, but it can never pass silently either.
 
 ## Phase 7 — Hand off
 
 Print a single summary block:
 
-- Files written / modified (with paths)
-- Lint findings summary (if Phase 6 ran)
-- List of any degraded phases (scan failure, defaults used, lint skipped) —
-  **nothing silent**
+- `Status:` exactly one of `success` (no entries in `degradations`),
+  `completed with degradations`, `failed` (hard failure), or `cancelled`.
+- Files written / modified (with paths), each verified to exist per the error
+  handling contract.
+- Lint outcome: exit code plus the error/warning counts, or the reason the
+  linter did not run.
+- Every entry in `degradations` — phase, verbatim error or exit code,
+  remediation. Include scan errors (`scanErrors` / `partialScan` /
+  `degradedScan`), defaults used because the question bank failed to load, an
+  un-appended guidance block, and lint errors. **Nothing silent**: if
+  `degradations` is non-empty, the status is never `success`.
 - Next steps: review `DESIGN.md`, optionally run
   `npx --yes @google/design.md export --format css-tailwind <that same file>`,
   commit.

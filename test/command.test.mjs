@@ -1,25 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import yaml from 'js-yaml';
+import { frontmatter } from './helpers.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const commandPath = path.join(root, 'commands/init-design-md.md');
 const skillPath = path.join(root, 'skills/init-design-md/SKILL.md');
 
-function frontmatter(filePath) {
-  const raw = readFileSync(filePath, 'utf8');
-  const fm = raw.match(/^---\n([\s\S]*?)\n---/);
-  assert.ok(fm, `${path.basename(filePath)} must start with YAML frontmatter`);
-  return { data: yaml.load(fm[1]), body: raw.slice(fm[0].length) };
-}
-
 test('commands/init-design-md.md exists with valid frontmatter', () => {
   assert.ok(existsSync(commandPath), 'commands/init-design-md.md missing');
   const { data } = frontmatter(commandPath);
-  assert.equal(typeof data, 'object');
   assert.ok(data.description, 'command needs a description');
 });
 

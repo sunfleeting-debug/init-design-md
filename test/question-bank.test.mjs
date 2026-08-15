@@ -1,10 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import yaml from 'js-yaml';
 import { Ajv2020 } from 'ajv/dist/2020.js';
+import { readOrFail, parseYaml } from './helpers.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REFS = path.join(root, 'skills/init-design-md/references');
@@ -30,8 +29,12 @@ const VALID_TRIGGERS = new Set([
 ]);
 
 function loadQuestions() {
-  const raw = readFileSync(path.join(REFS, 'question-bank.yaml'), 'utf8');
-  return yaml.load(raw);
+  const file = path.join(REFS, 'question-bank.yaml');
+  return parseYaml(readOrFail(file), file);
+}
+
+function schemaPath() {
+  return path.join(REFS, 'question-bank.schema.json');
 }
 
 test('question-bank.yaml is valid YAML and an array', () => {
@@ -41,9 +44,13 @@ test('question-bank.yaml is valid YAML and an array', () => {
 });
 
 test('every question matches the JSON schema', () => {
-  const schema = JSON.parse(
-    readFileSync(path.join(REFS, 'question-bank.schema.json'), 'utf8')
-  );
+  const rawSchema = readOrFail(schemaPath());
+  let schema;
+  try {
+    schema = JSON.parse(rawSchema);
+  } catch (err) {
+    assert.fail(`invalid JSON in ${schemaPath()}: ${err.message}`);
+  }
   const ajv = new Ajv2020({ allErrors: true });
   const validate = ajv.compile(schema);
   const q = loadQuestions();
@@ -65,6 +72,10 @@ test('defaultIndex points at a valid option and priority is unique', () => {
   const q = loadQuestions();
   const priorities = new Set();
   for (const item of q) {
+    assert.ok(Array.isArray(item.options) && item.options.length > 0,
+      `question "${item.id}": options must be a non-empty array`);
+    assert.equal(typeof item.defaultIndex, 'number',
+      `question "${item.id}": defaultIndex must be a number`);
     assert.ok(item.defaultIndex >= 0 && item.defaultIndex < item.options.length,
       `question "${item.id}": defaultIndex out of range`);
     assert.ok(!priorities.has(item.priority),
@@ -76,7 +87,11 @@ test('defaultIndex points at a valid option and priority is unique', () => {
 test('the default option is the one labeled (recommended)', () => {
   const q = loadQuestions();
   for (const item of q) {
-    const defaultLabel = item.options[item.defaultIndex].label;
+    const defaultOption = item.options?.[item.defaultIndex];
+    assert.ok(defaultOption, `question "${item.id}": no option at defaultIndex ${item.defaultIndex}`);
+    const defaultLabel = defaultOption.label;
+    assert.equal(typeof defaultLabel, 'string',
+      `question "${item.id}": default option has no label`);
     assert.ok(defaultLabel.includes('(recommended)'),
       `question "${item.id}": default option "${defaultLabel}" is not labeled "(recommended)"`);
   }
