@@ -26,12 +26,24 @@ instructions, so this is where the plugin's actual behavior gets verified.
    - Rerun `/init-design-md --deep` → at the conflict prompt choose
      **overwrite**; the regenerated DESIGN.md's tokens reflect the sampled UI
      source files (only if the project has UI components).
-4. Back in the plugin repo, record the run under `test/golden/<date>-<project>/`
+4. Failure paths (error handling contract). In a scratch copy of the project:
+   - `chmod 000 package.json`, run `/init-design-md --defaults` → the summary
+     lists `package.json` under scan errors with the real reason and
+     `Status: completed with degradations` (not `success`). Restore with
+     `chmod 644`.
+   - `chmod 444 .` (read-only dir), run `/init-design-md --defaults` → the run
+     stops with `Status: failed`, names the write error, leaves no
+     `DESIGN.md.tmp` behind, and does not append the guidance block.
+   - Hand-edit the generated `DESIGN.md` to introduce a lint error (e.g. set
+     `colors.primary` to `notacolor`), rerun `/init-design-md --from-existing`
+     → Phase 6 prints the error findings and the summary reports the non-zero
+     lint exit under degradations.
+5. Back in the plugin repo, record the run under `test/golden/<date>-<project>/`
    (create dir, commit it) with the generated DESIGN.md and a short note on
    anything odd.
 
 ## Failures
 
-- If any step 3 check fails, fix `SKILL.md` (or the relevant reference doc),
+- If any step 3 or step 4 check fails, fix `SKILL.md` (or the relevant reference doc),
   re-run, and update the golden record. Do not ship a release with a failing
   smoke test.
