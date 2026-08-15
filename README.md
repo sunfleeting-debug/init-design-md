@@ -59,8 +59,8 @@ claude plugin install design-md-init
 After generating, validate and wire up your build:
 
 ```bash
-npx --yes @google/design.md lint DESIGN.md
-npx --yes @google/design.md export --format css-tailwind DESIGN.md > theme.css
+npx --yes @google/design.md@0.4.0 lint DESIGN.md
+npx --yes @google/design.md@0.4.0 export --format css-tailwind DESIGN.md > theme.css
 ```
 
 ## 开发 / Development

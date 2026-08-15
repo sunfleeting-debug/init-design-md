@@ -2,7 +2,7 @@
 name: init-design-md
 description: Generate a DESIGN.md for this project to standardize AI-generated UI
 argument-hint: "[--deep] [--defaults] [--from-existing]"
-allowed-tools: "Bash, Read, Grep, Glob, Write, Edit, AskUserQuestion, Skill"
+allowed-tools: "Bash(npx:*), Read, Grep, Glob, Write, Edit, AskUserQuestion, Skill"
 ---
 
 Invoke the skill (use the Skill tool, skill name `design-md-init:init-design-md`) and run its full workflow.

@@ -11,7 +11,7 @@ instructions, so this is where the plugin's actual behavior gets verified.
 3. Verify:
    - `./DESIGN.md` was created and reads sensibly (not generic filler);
      Overview references this project's stack or name.
-   - YAML front matter parses; run `npx --yes @google/design.md lint DESIGN.md` →
+   - YAML front matter parses; run `npx --yes @google/design.md@0.4.0 lint DESIGN.md` →
      exit 0.
    - The agent-guidance block was appended to `.claude/CLAUDE.md` (or
      `CLAUDE.md` / `AGENTS.md`, per Phase 5 precedence), or created if none

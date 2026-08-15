@@ -1,7 +1,7 @@
 # Tailwind Export Cheatsheet
 
 When naming tokens in a generated DESIGN.md, prefer names that map cleanly to
-Tailwind's theme namespace so `npx @google/design.md export` produces usable
+Tailwind's theme namespace so `npx @google/design.md@0.4.0 export` produces usable
 output. This is guidance, not a requirement — DESIGN.md accepts any valid token name.
 
 ## Tailwind v3 (`theme.extend`)
